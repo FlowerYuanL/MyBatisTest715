@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+  mapper 根标签：
+  - namespace（必需）：绑定 Mapper 接口的全限定名（包名+接口名）
+  - 作用：建立 XML 文件与 Java 接口的关联[1,6,8](@ref)
+-->
+<mapper namespace="com.lsxp.mapper.UserMapper">
+
+    <!--增加信息-->
+    <insert id="insertUser" parameterType="User">
+        insert into users (name,age,position)
+        values(#{name},#{age},#{position})
+    </insert>
+
+    <!--更新信息-->
+    <update id="updateUser" parameterType="user">
+        update users set name = #{name},age = #{age},position=#{position}
+    </update>
+
+    <!--删除信息-->
+    <delete id="deleteUserById" parameterType="int">
+        delete from users where id = #{id};
+    </delete>
+
+    <select id="selectUserById" parameterType="int" resultType="user">
+        select*from users where id ={id}
+    </select>
+
+    <select id="selectAll" resultType="user">
+        select*from users;
+    </select>
+
+    <!--
+    <if>语句练习
+    -->
+    <select id="dncFindUsers" parameterType="user" resultType="user">
+        select * from users
+        where 1 = 1
+        <if test="name != null and name != ''">
+            and name like concat ('%',#{name},'%')
+        </if>
+        <if test="age != null and age != ''">
+            and age = #{age}
+        </if>
+        <if test="position != null and position != ''">
+            and position like concat ('%',#{position},'%')
+        </if>
+    </select>
+
+    <!--
+    <where>    <trim>
+    -->
+
+    <!--
+    <choose>,<when>,<otherwise>
+    -->
+    <!--<select id="dncFindUsers2" parameterType="user" resultType="user">
+        select * from users
+        <where>
+            <choose>
+                <when test="name != null and name !=''">
+                    and name like concat ('%',#{name},'%')
+                </when>
+                <when test="position !=null and position !=''">
+                    and position like concat ('%',#{position},'%')
+                </when>
+                <otherwise>
+                    and id is not null
+                </otherwise>
+            </choose>
+        </where>
+    </select>
+-->
+
+    <select id="dncFindUsers2" parameterType="user" resultType="user">
+        select * from users
+        <trim prefix="where" prefixOverrides="and">
+            <choose>
+                <when test="name != null and name !=''">
+                    and name like concat ('%',#{name},'%')
+                </when>
+                <when test="position != null and position != ''">
+                    and position like concat ('%',#{position},'%')
+                </when>
+                <otherwise>
+                    and id is not null
+                </otherwise>
+            </choose>
+        </trim>
+    </select>
+
+    <!--
+     <set>
+     -->
+
+    <!--<update id="dncUpdateUser" parameterType="user">
+        UPDATE USERS
+        <set>
+            <if test="name != null and name != ''">
+                name = #{name},
+            </if>
+            <if test="age != null and age != ''">
+                age = #{age},
+            </if>
+            <if test="position != null and position != ''">
+                position = #{position},
+            </if>
+        </set>
+        where id = #{id}
+    </update>-->
+
+    <update id="dncUpdateUser" parameterType="User">
+        UPDATE USERS
+        <trim prefix="set" suffixOverrides=",">
+            <if test="name != null and name != ''">
+                name = #{name},
+            </if>
+            <if test="age != null and age != ''">
+                age = #{age},
+            </if>
+            <if test="position != null and position != ''">
+                position = #{position},
+            </if>
+        </trim>
+        WHERE id = #{id}
+    </update>
+
+    <select id="qureyByArray" parameterType="java.util.Arrays" resultType="user">
+        select * from users where id in
+                            <foreach collection="array" item="id"
+                                     open="(" separator="," close=")">
+                                #{id}
+                            </foreach>
+    </select>
+
+    <select id="queryByMap" parameterType="java.util.Map" resultType="user">
+        SELECT * FROM USERS
+        WHERE POSITION = #{position}
+        AND ID IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <!--
+    注意1:应该由<set>元素包裹<foreach>元素
+    注意2:如果使用  #{key}  替代  ${key}  会导致key中的值被视作变量,无法替代列名
+    注意3:使用${key} 会有SQL注入的风险,务必保证 positions 的key均为合法字段.
+    -->
+    <update id="updateByMap" parameterType="updateParam">
+        UPDATE USERS
+        <set>
+            <foreach collection="columns" item="value" index="key" separator=",">
+                ${key} = #{value}
+            </foreach>
+        </set>
+        WHERE ID IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+</mapper>
