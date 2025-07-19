@@ -1,6 +1,7 @@
 package com.lsxp.utils;
 
 import com.lsxp.annotation.Updatable;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
 import java.util.HashSet;
@@ -18,7 +19,7 @@ public class FieldWhiteListUtil {
     *   Class<?>  :是Java的反射机制中的类类型对象
     * */
     /*接受一个类对象,如User.class*/
-    public static Set<String> getUpdateFields(Class<?> clazz){
+    public static @NotNull Set<String> getUpdateFields(@org.jetbrains.annotations.NotNull Class<?> clazz){
         /*用于保存所有用于更新的字段名*/
         Set<String> fields = new HashSet<>();
         /*获取这个类中定义的所有字段,包括私有字段,并遍历这些字段*/
